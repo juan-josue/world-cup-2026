@@ -1,0 +1,54 @@
+.container {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 16px;
+}
+
+/* Hide scrollbar but keep functionality */
+.container::-webkit-scrollbar { height: 4px; }
+.container::-webkit-scrollbar-track { background: var(--bg-deep); }
+.container::-webkit-scrollbar-thumb { background: var(--pitch-dark); border-radius: 2px; }
+
+.bracket {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: max-content;
+  padding: 8px 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  width: 210px;
+  flex-shrink: 0;
+}
+
+.roundLabel {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+  padding: 0 0 8px 4px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.matches {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each cell wrapper uses inline height from JS */
+.cellWrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Left-side horizontal connector (comes from previous round's arm) */
+.cellWrapper + .cellWrapper {
+  /* spacing handled by height */
+}

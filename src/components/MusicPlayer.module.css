@@ -1,0 +1,65 @@
+.btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(10, 15, 13, 0.88);
+  backdrop-filter: blur(12px);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+  transform: scale(1.06);
+}
+
+.playing {
+  border-color: var(--pitch-mid);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(26, 122, 58, 0.15), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Animated bars shown when playing */
+.bars {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 8px;
+}
+
+.bars i {
+  display: block;
+  width: 2px;
+  background: var(--gold);
+  border-radius: 1px;
+  animation: bounce 0.8s ease-in-out infinite;
+}
+
+.bars i:nth-child(1) { animation-delay: 0s;    height: 4px; }
+.bars i:nth-child(2) { animation-delay: 0.15s; height: 7px; }
+.bars i:nth-child(3) { animation-delay: 0.3s;  height: 4px; }
+
+@keyframes bounce {
+  0%, 100% { transform: scaleY(0.5); }
+  50%       { transform: scaleY(1.5); }
+}
+
+@media (max-width: 600px) {
+  .btn { bottom: 16px; right: 16px; width: 40px; height: 40px; }
+}
