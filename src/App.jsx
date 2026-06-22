@@ -21,7 +21,7 @@ const appVariants = {
 export default function App() {
   const {
     players, predictions, results, activePlayer,
-    addPlayer, removePlayer, setPrediction, setResult, knockoutTeams, setKnockoutTeam, switchPlayer, resetAll, loading,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, knockoutTeams, setKnockoutTeam, switchPlayer, resetAll, loading,
   } = useStore();
 
   const [tab, setTab] = useState('MATCHES');
@@ -33,6 +33,11 @@ export default function App() {
     if (!activePlayer) return;
     if (h === '' || h === undefined || a === '' || a === undefined) return;
     setPrediction(activePlayer, matchId, h, a);
+  };
+
+  const handleClearPrediction = (matchId) => {
+    if (!activePlayer) return;
+    clearPrediction(activePlayer, matchId);
   };
 
   const handleEnter = () => {
@@ -122,6 +127,7 @@ export default function App() {
                     results={results}
                     activePlayer={activePlayer}
                     onSetPrediction={handleSetPrediction}
+                    onClearPrediction={handleClearPrediction}
                     onSetResult={setResult}
                     isAdmin={isAdmin}
                   />

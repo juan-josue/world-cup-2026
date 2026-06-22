@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const DOC = doc(db, 'wc26', 'data');
@@ -63,6 +63,10 @@ export function useStore() {
     });
   }, [predictions]);
 
+  const clearPrediction = useCallback((playerId, matchId) => {
+    updateDoc(DOC, { [`predictions.${playerId}.${matchId}`]: deleteField() });
+  }, []);
+
   const setResult = useCallback((matchId, homeScore, awayScore) => {
     patch({ results: { ...results, [matchId]: { homeScore, awayScore } } });
   }, [results]);
@@ -90,6 +94,6 @@ export function useStore() {
 
   return {
     players, predictions, results, knockoutTeams, activePlayer, loading,
-    addPlayer, removePlayer, setPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, resetAll,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, resetAll,
   };
 }

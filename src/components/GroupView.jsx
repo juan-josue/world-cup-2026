@@ -5,7 +5,7 @@ import styles from './GroupView.module.css';
 
 const GROUP_KEYS = Object.keys(GROUPS);
 
-export default function GroupView({ predictions, results, activePlayer, onSetPrediction, onSetResult, isAdmin }) {
+export default function GroupView({ predictions, results, activePlayer, onSetPrediction, onClearPrediction, onSetResult, isAdmin }) {
   const [selected, setSelected] = useState('A');
 
   const group = GROUPS[selected];
@@ -43,6 +43,7 @@ export default function GroupView({ predictions, results, activePlayer, onSetPre
             prediction={activePlayer ? predictions?.[activePlayer]?.[match.id] : undefined}
             result={results?.[match.id]}
             onSetPrediction={(h, a) => onSetPrediction(match.id, h, a)}
+            onClearPrediction={() => onClearPrediction(match.id)}
             onSetResult={(h, a) => onSetResult(match.id, h, a)}
             isAdmin={isAdmin}
             activePlayer={activePlayer}

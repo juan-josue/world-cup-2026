@@ -197,6 +197,35 @@
 }
 .predBadgeLocked:hover { background: rgba(201,168,76,0.08); }
 
+.predBadgeWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clearPredBtn {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.clearPredBtn:hover {
+  background: rgba(217,79,61,0.15);
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
 @media (max-width: 480px) {
   .card { padding: 10px 10px; }
   .teamName { font-size: 0.7rem; }

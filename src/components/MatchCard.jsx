@@ -21,7 +21,7 @@ function ScoreInput({ value, onChange, disabled }) {
 export default function MatchCard({
   match, groupLabel,
   prediction, result,
-  onSetPrediction, onSetResult,
+  onSetPrediction, onClearPrediction, onSetResult,
   isAdmin, activePlayer,
 }) {
   const { id, date, home, away } = match;
@@ -105,13 +105,22 @@ export default function MatchCard({
             {/* Prediction button or badge */}
             {activePlayer && (
               hasPred ? (
-                <button
-                  className={`${styles.predBadge} ${hasResult ? styles.predBadgeLocked : ''}`}
-                  onClick={() => !hasResult && setModalOpen(true)}
-                  title={hasResult ? 'Match settled' : 'Edit prediction'}
-                >
-                  {predHome} – {predAway}
-                </button>
+                <div className={styles.predBadgeWrap}>
+                  <button
+                    className={`${styles.predBadge} ${hasResult ? styles.predBadgeLocked : ''}`}
+                    onClick={() => !hasResult && setModalOpen(true)}
+                    title={hasResult ? 'Match settled' : 'Edit prediction'}
+                  >
+                    {predHome} – {predAway}
+                  </button>
+                  {hasResult && (
+                    <button
+                      className={styles.clearPredBtn}
+                      onClick={onClearPrediction}
+                      title="Clear prediction"
+                    >×</button>
+                  )}
+                </div>
               ) : !hasResult ? (
                 <button className={styles.predictBtn} onClick={() => setModalOpen(true)}>
                   + Predict
