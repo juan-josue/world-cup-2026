@@ -45,9 +45,16 @@
   gap: 12px;
 }
 
-.logoIcon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 0 12px rgba(201,168,76,0.5));
+.crest {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  background: radial-gradient(120% 120% at 30% 20%, #1f3a26, #0c140f);
+  border: 1px solid var(--border-gold);
+  box-shadow: inset 0 1px 0 rgba(201,168,76,0.18), 0 0 18px rgba(201,168,76,0.08);
 }
 
 .logoTitle {
@@ -69,84 +76,96 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Segmented pill group */
+.navSeg {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
 }
 
 .navBtn {
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  padding: 8px 18px;
-  border-radius: 6px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.navBtn:hover { color: var(--text-primary); }
+
+.navActive {
+  background: linear-gradient(180deg, #15522a, #0d3318);
+  color: var(--gold-light);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.adminBtn {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg-card);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s;
 }
+.adminBtn:hover { color: var(--text-primary); border-color: var(--gold-dim); }
+.adminActive { background: rgba(201,168,76,0.12); border-color: var(--gold-dim); color: var(--gold-light); }
 
-.navBtn:hover { color: var(--text-primary); border-color: var(--pitch-dark); }
-
-.navActive {
-  background: var(--pitch-dark);
-  border-color: var(--pitch-mid);
-  color: var(--gold-light);
-}
-
-.adminBtn { font-size: 0.75rem; }
-.adminActive { background: rgba(201,168,76,0.12) !important; border-color: var(--gold-dim) !important; color: var(--gold-light) !important; }
-
-/* ── Main layout ── */
+/* ── Main layout (single column) ── */
 .main {
   flex: 1;
-  max-width: 1280px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
-.sidebar {
-  position: sticky;
-  top: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  padding: 22px 24px;
 }
 
 .content { min-width: 0; }
 
+/* Admin bar */
 .adminNotice {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
   background: rgba(201,168,76,0.08);
   border: 1px solid var(--gold-dim);
   border-radius: var(--r);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
-
-.adminNotice strong { color: var(--gold-light); display: block; margin-bottom: 2px; }
+.adminIcon { font-size: 1.1rem; flex-shrink: 0; }
+.adminText { flex: 1; min-width: 0; }
+.adminNotice strong { color: var(--gold-light); display: block; margin-bottom: 1px; }
 .adminNotice p { color: var(--text-muted); }
 
 .resetBtn {
-  margin-top: 10px;
-  width: 100%;
-  padding: 7px;
-  border-radius: 6px;
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 7px;
   border: 1px solid rgba(217, 79, 61, 0.4);
   background: rgba(217, 79, 61, 0.08);
   color: #d94f3d;
   font-family: var(--font-display);
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -172,11 +191,7 @@
 
 /* ── Responsive ── */
 @media (max-width: 780px) {
-  .main {
-    grid-template-columns: 1fr;
-    padding: 14px;
-  }
-  .sidebar { position: static; }
+  .main { padding: 16px 14px; }
 }
 
 @media (max-width: 600px) {

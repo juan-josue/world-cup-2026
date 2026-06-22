@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { computeLeaderboard } from '../data/worldcup';
 import styles from './Leaderboard.module.css';
 
@@ -24,10 +25,13 @@ export default function Leaderboard({ players, predictions, results }) {
         {board.map((player, i) => {
           const isTop = i === 0 && player.total > 0;
           return (
-            <div
+            <motion.div
               key={player.id}
               className={`${styles.row} ${isTop ? styles.top : ''}`}
               style={{ '--player-color': player.color }}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
             >
               <span className={styles.rank}>
                 {i < 3 && player.total > 0 ? MEDALS[i] : `#${i + 1}`}
@@ -41,7 +45,7 @@ export default function Leaderboard({ players, predictions, results }) {
                 />
               </div>
               <span className={styles.pts}>{player.total}<small>pts</small></span>
-            </div>
+            </motion.div>
           );
         })}
       </div>

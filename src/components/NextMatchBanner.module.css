@@ -1,112 +1,290 @@
 .banner {
   border-top: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(201,168,76,0.06) 0%, rgba(10,15,13,0) 100%);
+  background: linear-gradient(180deg, rgba(77,184,122,0.05) 0%, rgba(10,15,13,0) 60%);
 }
 
-/* ── Countdown section ── */
-.countdownSection {
+.body {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 20px 24px 18px;
+  padding: 18px 24px 16px;
+}
+
+/* ── Top row: status tag + meta ── */
+.top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.matchInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.nextLabel {
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-display);
-  font-size: 0.65rem;
   font-weight: 800;
-  letter-spacing: 0.15em;
-  color: var(--gold);
-  opacity: 0.8;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.tagLive { color: #5fe39a; }
+.tagNext { color: #4db87a; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5fe39a;
+  box-shadow: 0 0 10px #5fe39a;
+  animation: pulse 1.3s ease-in-out infinite;
+}
+.dotNext { background: #4db87a; box-shadow: 0 0 10px #4db87a; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.75); } }
+
+.meta {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: right;
 }
 
-.matchTeams {
+.topRight { display: flex; align-items: center; gap: 10px; }
+
+.collapseBtn, .expandBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+.collapseBtn:hover, .expandBtn:hover { color: var(--gold-light); border-color: var(--gold-dim); }
+
+/* ── Collapsed slim strip ── */
+.collapsedBar {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.03em;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 9px 24px;
 }
-
-.teamFlag { font-size: 1.5rem; line-height: 1; }
-
-.teamName { color: var(--text-primary); }
-
-.vs {
-  font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  color: var(--text-dim);
-  padding: 0 2px;
-}
-
-.deadlineNote {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  letter-spacing: 0.03em;
-}
-
-/* ── Big clock ── */
-.clock {
-  display: flex;
+.cTag {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.66rem;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.cTagLive { color: #5fe39a; background: rgba(95,227,154,0.1); border: 1px solid rgba(95,227,154,0.3); }
+.cTagNext { color: #4db87a; background: rgba(77,184,122,0.08); border: 1px solid var(--border); }
+.cFlags { font-size: 1rem; flex-shrink: 0; }
+.cTeams {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cWhen {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+  color: #5fe39a;
+  font-variant-numeric: tabular-nums;
 }
 
-.clockUnit {
+/* ── Matchup ── */
+.matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.side {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 18px;
-  min-width: 80px;
+  gap: 8px;
 }
 
-.clockNum {
+.flag { font-size: 2.5rem; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+
+.team {
   font-family: var(--font-display);
-  font-size: 3rem;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--gold-light);
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 30px rgba(201,168,76,0.4);
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 0.03em;
+  text-align: center;
+  color: var(--text-primary);
 }
 
-.clockLabel {
+.center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+.vs {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+
+.minute {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: #5fe39a;
+  text-shadow: 0 0 22px rgba(95,227,154,0.4);
+}
+.minLabel {
   font-family: var(--font-display);
   font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Live progress bar ── */
+.progress { margin: 18px 4px 2px; }
+.bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--pitch), #5fe39a);
+  transition: width 1s linear;
+}
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+/* ── Countdown clock ── */
+.clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+.clockGroup { display: inline-flex; align-items: center; gap: 6px; }
+
+.unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 16px;
+  min-width: 76px;
+}
+.num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.unitLbl {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--text-dim);
 }
+.unitSec { border-color: rgba(95,227,154,0.35); }
+.unitSec .num { color: #5fe39a; text-shadow: 0 0 24px rgba(95,227,154,0.45); }
 
-.clockSep {
+.sep {
   font-family: var(--font-display);
-  font-size: 2.4rem;
   font-weight: 900;
-  color: var(--gold-dim);
-  line-height: 1;
-  margin-bottom: 16px;
-  align-self: center;
+  font-size: 1.7rem;
+  color: var(--text-dim);
+  margin-bottom: 14px;
 }
 
-/* ── Marquee section ── */
+/* ── Up next strip ── */
+.upnext {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 11px 24px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,0.22);
+}
+.upTag {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.upFlags { font-size: 1rem; flex-shrink: 0; }
+.upTeams {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.upVs { color: var(--text-dim); font-weight: 800; font-size: 0.72rem; padding: 0 2px; }
+.upWhen {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--gold-light);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Standings marquee ── */
 .marqueeSection {
   border-top: 1px solid var(--border);
   display: flex;
@@ -114,7 +292,6 @@
   overflow: hidden;
   height: 34px;
 }
-
 .marqueePill {
   flex-shrink: 0;
   font-family: var(--font-display);
@@ -129,68 +306,30 @@
   align-items: center;
   z-index: 1;
 }
-
 .marqueeTrack {
   flex: 1;
   overflow: hidden;
   position: relative;
   mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
 }
-
-.marqueeInner {
-  display: flex;
-  width: max-content;
-  animation: scroll 30s linear infinite;
-}
-
-.marqueeItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 16px;
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
-.marqueeMedal {
-  font-size: 0.85rem;
-}
-
-.marqueeName {
-  font-weight: 600;
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  letter-spacing: 0.04em;
-}
-
-.marqueeScore {
-  font-family: var(--font-display);
-  font-weight: 800;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
-.marqueeDot {
-  color: var(--text-dim);
-  margin-left: 4px;
-}
-
-@keyframes scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
+.marqueeInner { display: flex; width: max-content; animation: scroll 30s linear infinite; }
+.marqueeItem { display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 0.8rem; white-space: nowrap; }
+.marqueeMedal { font-size: 0.85rem; }
+.marqueeName { font-weight: 600; font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 0.04em; }
+.marqueeScore { font-family: var(--font-display); font-weight: 800; color: var(--text-muted); font-size: 0.85rem; }
+.marqueeDot { color: var(--text-dim); margin-left: 4px; }
+@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .countdownSection {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 16px;
-  }
-
-  .clockNum { font-size: 2.2rem; }
-  .clockUnit { min-width: 62px; padding: 8px 12px; }
-
-  .matchTeams { font-size: 1.1rem; }
+  .body { padding: 14px 16px; }
+  .team { font-size: 1.05rem; }
+  .flag { font-size: 2rem; }
+  .num { font-size: 1.9rem; }
+  .unit { min-width: 56px; padding: 9px 10px; }
+  .sep { font-size: 1.3rem; margin-bottom: 14px; }
+  .minute { font-size: 1.4rem; }
+  .upnext { flex-wrap: wrap; padding: 10px 16px; }
+  .upWhen { margin-left: 0; }
+  .collapsedBar { padding: 8px 16px; }
 }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FLAGS, scoreForMatch } from '../data/worldcup';
+import { useState, useEffect, useRef } from 'react';
+import { FLAGS, scoreForMatch, isLocked, formatKickoff } from '../data/worldcup';
 import PredictionModal from './PredictionModal';
 import styles from './KnockoutMatchCard.module.css';
 
@@ -16,7 +16,8 @@ function ScoreInput({ value, onChange }) {
 }
 
 export default function KnockoutMatchCard({
-  match, teams, result, prediction,
+  match, teams, result, prediction, now,
+  focusMatchId, focusKey,
   onSetTeams, onSetResult, onSetPrediction,
   isAdmin, activePlayer,
   pairPosition, // 'top' | 'bottom' | 'single'
@@ -27,6 +28,9 @@ export default function KnockoutMatchCard({
   const hasTeams = !!home && !!away;
   const hasResult = result !== undefined;
   const hasPred = prediction !== undefined;
+  const locked = isLocked(match.id, now);
+  const editable = !hasResult && !locked;
+  const cardRef = useRef(null);
 
   const pts = hasResult && hasPred ? scoreForMatch(prediction, result) : null;
   const resHome = result?.homeScore;
@@ -42,6 +46,19 @@ export default function KnockoutMatchCard({
 
   useEffect(() => { setLocalResHome(resHome ?? ''); setLocalResAway(resAway ?? ''); }, [resHome, resAway]);
   useEffect(() => { setAdminHome(home ?? ''); setAdminAway(away ?? ''); }, [home, away]);
+
+  // Scroll to and flash this card when it's the jump target (banner "Lock in bet").
+  useEffect(() => {
+    if (focusMatchId !== match.id || !focusKey) return;
+    const el = cardRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove(styles.highlight);
+    void el.offsetWidth; // force reflow so the animation restarts on repeat clicks
+    el.classList.add(styles.highlight);
+    const t = setTimeout(() => el.classList.remove(styles.highlight), 1800);
+    return () => clearTimeout(t);
+  }, [focusKey, focusMatchId, match.id]);
 
   const handleResChange = (side, val) => {
     const h = side === 'home' ? val : localResHome;
@@ -74,9 +91,9 @@ export default function KnockoutMatchCard({
   return (
     <>
       <div className={wrapperClass}>
-        <div className={`${styles.card} ${hasResult ? styles.settled : ''}`}>
+        <div ref={cardRef} className={`${styles.card} ${hasResult ? styles.settled : ''}`}>
           <div className={styles.meta}>
-            <span className={styles.date}>{match.date}</span>
+            <span className={styles.date}>{formatKickoff(match.kickoff).date} · {formatKickoff(match.kickoff).time}</span>
             {pts !== null && (
               <span className={`${styles.pts} ${isExact ? styles.ptsExact : pts > 1 ? styles.ptsGood : pts === 0 ? styles.ptsBad : ''}`}>
                 {isExact ? '⚡' : ''}{pts}pt{pts !== 1 ? 's' : ''}
@@ -119,11 +136,14 @@ export default function KnockoutMatchCard({
                 {activePlayer && hasTeams && (
                   hasPred ? (
                     <button
-                      className={`${styles.predBadge} ${hasResult ? styles.predLocked : ''}`}
-                      onClick={() => !hasResult && setModalOpen(true)}
+                      className={`${styles.predBadge} ${!editable ? styles.predLocked : ''}`}
+                      onClick={() => editable && setModalOpen(true)}
+                      title={hasResult ? 'Settled' : locked ? 'Betting closed' : 'Edit prediction'}
                     >{predHome} – {predAway}</button>
-                  ) : !hasResult ? (
+                  ) : editable ? (
                     <button className={styles.predictBtn} onClick={() => setModalOpen(true)}>+ Predict</button>
+                  ) : locked ? (
+                    <span className={styles.lockedChip} title="Locked at kickoff">🔒</span>
                   ) : null
                 )}
               </div>

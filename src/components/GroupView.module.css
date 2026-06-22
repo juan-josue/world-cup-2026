@@ -1,36 +1,127 @@
 .wrap { display: flex; flex-direction: column; gap: 0; }
 
-.tabs {
+/* ── Toolbar: group dropdown + count ── */
+.toolbar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 16px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--r) var(--r) 0 0;
   border-bottom: none;
 }
 
-.tab {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+.dropdown { position: relative; }
+
+.ddTrigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-gold);
   background: var(--bg-deep);
-  color: var(--text-muted);
+  color: var(--gold-light);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s, background 0.15s;
+}
+.ddTrigger:hover { border-color: var(--gold-dim); }
+
+.ddLabel {
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
 }
 
-.tab:hover { border-color: var(--pitch-dark); color: var(--text-primary); }
+.ddCaret { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.18s; }
+.ddCaretOpen { transform: rotate(180deg); }
 
-.active {
-  background: var(--pitch-dark);
-  border-color: var(--pitch-mid);
+.ddMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  transform-origin: top center;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+}
+
+.ddItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.ddItem:hover { background: rgba(255,255,255,0.05); }
+
+.ddItemActive { color: var(--gold-light); background: var(--pitch-dark); }
+.ddCheck { font-size: 0.8rem; color: var(--gold); }
+
+.count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.jumpBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.76rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-gold);
+  background: var(--bg-deep);
   color: var(--gold-light);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.jumpBtn:hover { border-color: var(--gold-dim); background: var(--bg-raised); }
+
+.jumpDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.jumpDotLive {
+  background: #5fe39a;
+  box-shadow: 0 0 8px #5fe39a;
+  animation: jumpPulse 1.3s ease-in-out infinite;
+}
+@keyframes jumpPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+
+@media (max-width: 600px) {
+  .jumpBtn { margin-left: 0; padding: 7px 11px; font-size: 0.7rem; }
 }
 
 .groupHeader {
@@ -77,16 +168,29 @@
   border-radius: 0 0 var(--r) var(--r);
 }
 
+.dayHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 10px 2px 2px;
+}
+.dayHead:first-child { margin-top: 2px; }
+.dayHead::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-gold), transparent);
+}
+
 @media (max-width: 600px) {
-  .tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 10px;
-    gap: 4px;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { font-size: 0.85rem; padding: 5px 10px; flex-shrink: 0; }
+  .toolbar { padding: 10px; gap: 10px; flex-wrap: wrap; }
+  .ddTrigger { min-width: 150px; font-size: 0.95rem; }
   .groupHeader { padding: 10px 14px; gap: 10px; }
   .groupLabel { font-size: 1.1rem; }
   .matches { padding: 8px; gap: 6px; }

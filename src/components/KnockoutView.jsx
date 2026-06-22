@@ -6,7 +6,7 @@ import styles from './KnockoutView.module.css';
 const ROUND_MULTIPLIERS = { r32: 1, r16: 2, qf: 4, sf: 8, final: 16 };
 
 export default function KnockoutView({
-  predictions, results, knockoutTeams, activePlayer,
+  predictions, results, knockoutTeams, activePlayer, now, focusMatchId, focusKey,
   onSetPrediction, onSetResult, onSetTeams, isAdmin,
 }) {
   return (
@@ -46,6 +46,9 @@ export default function KnockoutView({
                         teams={teams}
                         result={result}
                         prediction={prediction}
+                        now={now}
+                        focusMatchId={focusMatchId}
+                        focusKey={focusKey}
                         onSetTeams={(h, a) => onSetTeams(match.id, h, a)}
                         onSetResult={(h, a) => onSetResult(match.id, h, a)}
                         onSetPrediction={(h, a) => onSetPrediction(match.id, h, a)}
