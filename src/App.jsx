@@ -26,10 +26,10 @@ const appVariants = {
 export default function App() {
   const {
     players, predictions, results, activePlayer,
-    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, knockoutTeams, setKnockoutTeam, switchPlayer, resetAll, loading,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, knockoutTeams, setKnockoutTeam, switchPlayer, setBonusPoints, resetAll, seedR32Teams, loading,
   } = useStore();
 
-  const [tab, setTab] = useState('MATCHES');
+  const [tab, setTab] = useState('KNOCKOUT');
   const [selectedGroup, setSelectedGroup] = useState('ALL');
   const [focusMatchId, setFocusMatchId] = useState(null);
   const [focusKey, setFocusKey] = useState(0);
@@ -42,7 +42,7 @@ export default function App() {
     if (!activePlayer) return;
     if (isLocked(matchId)) return;
     if (h === '' || h === undefined || a === '' || a === undefined) return;
-    setPrediction(activePlayer, matchId, h, a);
+    setPrediction(activePlayer, matchId, { homeScore: h, awayScore: a });
   };
 
   const handleJumpToMissing = ({ matchId, tab: jumpTab, group }) => {
@@ -142,6 +142,14 @@ export default function App() {
                     <p>Enter real match results in the Matches tab — scores auto-calculate.</p>
                   </div>
                   <button
+                    className={styles.seedBtn}
+                    onClick={() => {
+                      if (window.confirm('Seed all 16 Round of 32 teams from the actual 2026 bracket? This will overwrite any existing R32 team assignments.')) {
+                        seedR32Teams();
+                      }
+                    }}
+                  >Seed R32 Teams</button>
+                  <button
                     className={styles.resetBtn}
                     onClick={() => {
                       if (window.confirm('Reset everything? This will delete all players, predictions, and results.')) {
@@ -188,10 +196,10 @@ export default function App() {
                     now={now}
                     focusMatchId={focusMatchId}
                     focusKey={focusKey}
-                    onSetPrediction={(matchId, h, a) => {
+                    onSetPrediction={(matchId, predObj) => {
                       if (!activePlayer) return;
                       if (isLocked(matchId)) return;
-                      setPrediction(activePlayer, matchId, h, a);
+                      setPrediction(activePlayer, matchId, predObj);
                     }}
                     onSetResult={setResult}
                     onSetTeams={setKnockoutTeam}
@@ -203,6 +211,8 @@ export default function App() {
                     players={players}
                     predictions={predictions}
                     results={results}
+                    isAdmin={isAdmin}
+                    onSetBonusPoints={setBonusPoints}
                   />
                 )}
                   </motion.div>

@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { computeLeaderboard } from '../data/worldcup';
 import styles from './Leaderboard.module.css';
 
 const MEDALS = ['🥇','🥈','🥉'];
 
-export default function Leaderboard({ players, predictions, results }) {
+export default function Leaderboard({ players, predictions, results, isAdmin, onSetBonusPoints }) {
   const board = computeLeaderboard(players, predictions, results);
   const totalSettled = Object.keys(results).length;
+  const [drafts, setDrafts] = useState({});
 
   if (!players.length) return (
     <div className={styles.empty}>
@@ -14,6 +16,18 @@ export default function Leaderboard({ players, predictions, results }) {
       <p>Add players to see the leaderboard</p>
     </div>
   );
+
+  const handleBonusChange = (playerId, val) => {
+    setDrafts(d => ({ ...d, [playerId]: val }));
+  };
+
+  const commitBonus = (playerId) => {
+    const val = drafts[playerId];
+    if (val === undefined || val === '') return;
+    const n = parseInt(val, 10);
+    if (!isNaN(n)) onSetBonusPoints(playerId, n);
+    setDrafts(d => { const next = { ...d }; delete next[playerId]; return next; });
+  };
 
   return (
     <div className={styles.wrap}>
@@ -24,6 +38,8 @@ export default function Leaderboard({ players, predictions, results }) {
       <div className={styles.rows}>
         {board.map((player, i) => {
           const isTop = i === 0 && player.total > 0;
+          const bonus = player.bonusPoints ?? 0;
+          const draftVal = drafts[player.id] !== undefined ? drafts[player.id] : String(bonus || '');
           return (
             <motion.div
               key={player.id}
@@ -44,15 +60,36 @@ export default function Leaderboard({ players, predictions, results }) {
                   style={{ width: board[0]?.total ? `${(player.total / board[0].total) * 100}%` : '0%' }}
                 />
               </div>
+              {isAdmin ? (
+                <div className={styles.bonusWrap}>
+                  <label className={styles.bonusLabel}>bonus</label>
+                  <input
+                    type="number"
+                    className={styles.bonusInput}
+                    value={draftVal}
+                    onChange={e => handleBonusChange(player.id, e.target.value)}
+                    onBlur={() => commitBonus(player.id)}
+                    onKeyDown={e => e.key === 'Enter' && commitBonus(player.id)}
+                    title="Bonus/penalty points (can be negative)"
+                  />
+                </div>
+              ) : bonus !== 0 ? (
+                <span className={`${styles.bonusBadge} ${bonus < 0 ? styles.bonusBadgeNeg : ''}`}>
+                  {bonus > 0 ? '+' : ''}{bonus}
+                </span>
+              ) : null}
               <span className={styles.pts}>{player.total}<small>pts</small></span>
             </motion.div>
           );
         })}
       </div>
       <div className={styles.legend}>
-        <span>✔ Winner = 1pt</span>
-        <span>✔ Exact score (home or away) = +1pt each</span>
-        <span>⚡ Exact winner + score = ×2</span>
+        <span className={styles.legendHeading}>Group stage</span>
+        <span>✔ Correct winner = 1pt · correct score (home or away) = +1pt each · exact score = ×2 · max 6pts</span>
+        <span className={styles.legendHeading}>Knockout stage</span>
+        <span>✔ Correct winner = 2pts · correct score = +2pts each · exact score = ×2 · max 12pts</span>
+        <span>⚽ Correct over/under 2.5 goals (90 min) = +2pts</span>
+        <span>🏆 Correct team to advance (incl. extra time &amp; pens) = +2pts · max 16pts per match</span>
       </div>
     </div>
   );

@@ -2,39 +2,58 @@
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 16px;
+  padding-bottom: 24px;
 }
 
-/* Hide scrollbar but keep functionality */
-.container::-webkit-scrollbar { height: 4px; }
-.container::-webkit-scrollbar-track { background: var(--bg-deep); }
-.container::-webkit-scrollbar-thumb { background: var(--pitch-dark); border-radius: 2px; }
+/* Scrollbar */
+.container::-webkit-scrollbar { height: 5px; }
+.container::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 3px; }
+.container::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
 
 .bracket {
   display: flex;
   align-items: flex-start;
   gap: 0;
   min-width: max-content;
-  padding: 8px 0;
+  padding: 8px 32px 8px 0;
 }
 
 .column {
   display: flex;
   flex-direction: column;
-  width: 210px;
+  width: 240px;
   flex-shrink: 0;
 }
 
+/* ── Round label — fixed height so all .matches areas start at the same Y ── */
 .roundLabel {
+  height: 48px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 0 8px 4px;
+}
+
+.roundName {
   font-family: var(--font-display);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
   color: var(--gold);
   text-transform: uppercase;
-  padding: 0 0 8px 4px;
-  opacity: 0.7;
   white-space: nowrap;
+  line-height: 1;
+}
+
+.roundDates {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .matches {
@@ -42,13 +61,7 @@
   flex-direction: column;
 }
 
-/* Each cell wrapper uses inline height from JS */
 .cellWrapper {
   display: flex;
   align-items: center;
-}
-
-/* Left-side horizontal connector (comes from previous round's arm) */
-.cellWrapper + .cellWrapper {
-  /* spacing handled by height */
 }

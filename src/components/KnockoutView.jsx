@@ -2,8 +2,15 @@ import { KNOCKOUT_ROUNDS } from '../data/worldcup';
 import KnockoutMatchCard from './KnockoutMatchCard';
 import styles from './KnockoutView.module.css';
 
-// Each round's cell height is a multiple of the base --cell value
 const ROUND_MULTIPLIERS = { r32: 1, r16: 2, qf: 4, sf: 8, final: 16 };
+
+const ROUND_DATES = {
+  r32:   'Jun 28 – Jul 3',
+  r16:   'Jul 4 – 7',
+  qf:    'Jul 9 – 11',
+  sf:    'Jul 14 – 15',
+  final: 'Jul 18 – 19',
+};
 
 export default function KnockoutView({
   predictions, results, knockoutTeams, activePlayer, now, focusMatchId, focusKey,
@@ -18,14 +25,16 @@ export default function KnockoutView({
 
           return (
             <div key={round.id} className={styles.column}>
-              <div className={styles.roundLabel}>{round.name}</div>
+              <div className={styles.roundLabel}>
+                <span className={styles.roundName}>{round.name}</span>
+                <span className={styles.roundDates}>{ROUND_DATES[round.id]}</span>
+              </div>
 
               <div
                 className={styles.matches}
                 style={{ '--mult': multiplier }}
               >
                 {round.matches.map((match, mi) => {
-                  // Determine pair position for connector lines
                   let pairPosition = 'single';
                   if (!isFinalRound) {
                     pairPosition = mi % 2 === 0 ? 'top' : 'bottom';
@@ -49,9 +58,10 @@ export default function KnockoutView({
                         now={now}
                         focusMatchId={focusMatchId}
                         focusKey={focusKey}
+                        roundId={round.id}
                         onSetTeams={(h, a) => onSetTeams(match.id, h, a)}
-                        onSetResult={(h, a) => onSetResult(match.id, h, a)}
-                        onSetPrediction={(h, a) => onSetPrediction(match.id, h, a)}
+                        onSetResult={(h, a, adv) => onSetResult(match.id, h, a, adv)}
+                        onSetPrediction={(predObj) => onSetPrediction(match.id, predObj)}
                         isAdmin={isAdmin}
                         activePlayer={activePlayer}
                         pairPosition={pairPosition}

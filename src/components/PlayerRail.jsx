@@ -34,11 +34,6 @@ export default function PlayerRail({ players, activePlayer, onAdd, onRemove, onS
         >
           <span className={styles.dot} style={{ background: p.color }}>{initials(p.name)}</span>
           <span className={styles.name}>{p.name}</span>
-          <button
-            className={styles.remove}
-            onClick={e => { e.stopPropagation(); onRemove(p.id); }}
-            title={`Remove ${p.name}`}
-          >×</button>
         </div>
       ))}
 

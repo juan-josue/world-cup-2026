@@ -44,6 +44,10 @@ export function useStore() {
     return id;
   }, [players]);
 
+  const setBonusPoints = useCallback((playerId, points) => {
+    patch({ players: players.map(p => p.id === playerId ? { ...p, bonusPoints: points } : p) });
+  }, [players]);
+
   const removePlayer = useCallback((id) => {
     const newPredictions = { ...predictions };
     delete newPredictions[id];
@@ -54,11 +58,11 @@ export function useStore() {
     }
   }, [players, predictions, activePlayer]);
 
-  const setPrediction = useCallback((playerId, matchId, homeScore, awayScore) => {
+  const setPrediction = useCallback((playerId, matchId, predObj) => {
     patch({
       predictions: {
         ...predictions,
-        [playerId]: { ...(predictions[playerId] || {}), [matchId]: { homeScore, awayScore } },
+        [playerId]: { ...(predictions[playerId] || {}), [matchId]: predObj },
       },
     });
   }, [predictions]);
@@ -67,8 +71,10 @@ export function useStore() {
     updateDoc(DOC, { [`predictions.${playerId}.${matchId}`]: deleteField() });
   }, []);
 
-  const setResult = useCallback((matchId, homeScore, awayScore) => {
-    patch({ results: { ...results, [matchId]: { homeScore, awayScore } } });
+  const setResult = useCallback((matchId, homeScore, awayScore, advancingTeam) => {
+    const resultObj = { homeScore, awayScore };
+    if (advancingTeam) resultObj.advancingTeam = advancingTeam;
+    patch({ results: { ...results, [matchId]: resultObj } });
   }, [results]);
 
   const clearResult = useCallback((matchId) => {
@@ -92,8 +98,32 @@ export function useStore() {
     localStorage.removeItem('wc26_activePlayer');
   }, []);
 
+  const seedR32Teams = useCallback(() => {
+    patch({
+      knockoutTeams: {
+        ...knockoutTeams,
+        R32_1:  { home: 'South Africa',          away: 'Canada' },
+        R32_2:  { home: 'Brazil',                away: 'Japan' },
+        R32_3:  { home: 'Germany',               away: 'Paraguay' },
+        R32_4:  { home: 'Netherlands',           away: 'Morocco' },
+        R32_5:  { home: 'Ivory Coast',           away: 'Norway' },
+        R32_6:  { home: 'France',                away: 'Sweden' },
+        R32_7:  { home: 'Mexico',                away: 'Ecuador' },
+        R32_8:  { home: 'England',               away: 'DR Congo' },
+        R32_9:  { home: 'Belgium',               away: 'Senegal' },
+        R32_10: { home: 'United States',         away: 'Bosnia and Herzegovina' },
+        R32_11: { home: 'Spain',                 away: 'Austria' },
+        R32_12: { home: 'Portugal',              away: 'Croatia' },
+        R32_13: { home: 'Switzerland',           away: 'Algeria' },
+        R32_14: { home: 'Australia',             away: 'Egypt' },
+        R32_15: { home: 'Argentina',             away: 'Cape Verde' },
+        R32_16: { home: 'Colombia',              away: 'Ghana' },
+      },
+    });
+  }, [knockoutTeams]);
+
   return {
     players, predictions, results, knockoutTeams, activePlayer, loading,
-    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, resetAll,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, setBonusPoints, resetAll, seedR32Teams,
   };
 }

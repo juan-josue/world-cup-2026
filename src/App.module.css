@@ -154,6 +154,26 @@
 .adminNotice strong { color: var(--gold-light); display: block; margin-bottom: 1px; }
 .adminNotice p { color: var(--text-muted); }
 
+.seedBtn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: 1px solid rgba(77, 184, 122, 0.4);
+  background: rgba(77, 184, 122, 0.08);
+  color: #4db87a;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.seedBtn:hover {
+  background: rgba(77, 184, 122, 0.18);
+  border-color: rgba(77, 184, 122, 0.7);
+}
+
 .resetBtn {
   flex-shrink: 0;
   padding: 8px 14px;

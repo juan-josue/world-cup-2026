@@ -1,36 +1,36 @@
 /* Cell height per round — drives bracket spacing */
-:root { --cell: 110px; }
+:root { --cell: 130px; }
 
 .wrapper {
   height: var(--cell);
   display: flex;
   align-items: center;
   position: relative;
-  padding-right: 24px; /* space for connector arm */
+  padding-right: 24px;
 }
 
-/* Right-side connector arms */
+/* ── Right-side connector arms ── */
 .pairTop::after,
 .pairBottom::after {
   content: '';
   position: absolute;
   right: 0;
   width: 24px;
-  border-color: var(--border);
+  border-color: rgba(201, 168, 76, 0.28);
   border-style: solid;
 }
 
 .pairTop::after {
   top: 50%;
   bottom: 0;
-  border-width: 0 2px 2px 0; /* right + bottom */
+  border-width: 0 2px 2px 0;
   border-bottom-right-radius: 4px;
 }
 
 .pairBottom::after {
   top: 0;
   bottom: 50%;
-  border-width: 2px 2px 0 0; /* right + top */
+  border-width: 2px 2px 0 0;
   border-top-right-radius: 4px;
 }
 
@@ -45,10 +45,16 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* State: has result */
 .settled { border-left: 3px solid var(--pitch); }
 
+/* State: has prediction (not yet settled) */
+.hasPred { border-left: 3px solid rgba(201, 168, 76, 0.55); }
+
+/* Flash animation for jump target */
 .highlight {
   animation: focusFlash 1.8s ease-out;
 }
@@ -58,6 +64,30 @@
   100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); border-color: var(--border); }
 }
 
+/* ── Progressive round styling ── */
+.round_qf {
+  background: var(--bg-raised);
+  border-color: rgba(201, 168, 76, 0.15);
+}
+
+.round_sf {
+  background: linear-gradient(135deg, #172010, #111a15);
+  border-color: rgba(201, 168, 76, 0.25);
+}
+
+.round_final {
+  background: linear-gradient(135deg, #1e2a18, #141e10);
+  border-color: rgba(201, 168, 76, 0.4);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.07);
+}
+
+/* ── Special: THE FINAL ── */
+.isFinal {
+  border-color: rgba(201, 168, 76, 0.6);
+  box-shadow: 0 0 32px rgba(201, 168, 76, 0.14), inset 0 0 32px rgba(201, 168, 76, 0.03);
+}
+
+/* ── Meta row ── */
 .meta {
   display: flex;
   align-items: center;
@@ -66,9 +96,19 @@
 }
 
 .date {
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   color: var(--text-muted);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
+}
+
+.matchBadge {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.8;
 }
 
 .pts {
@@ -92,39 +132,45 @@
   gap: 4px;
 }
 
+/* Vertical team layout — flag on top, name below */
 .team {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 5px;
-  border-radius: 5px;
-  min-width: 0;
-}
-
-.teamRight { flex-direction: row-reverse; text-align: right; }
-
-.winner { background: rgba(26,122,58,0.12); }
-.loser  { opacity: 0.45; }
-.draw   { background: rgba(255,255,255,0.03); }
-
-.flag { font-size: 1rem; flex-shrink: 0; }
-
-.teamName {
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Scores ── */
-.scores {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  min-width: 70px;
+  padding: 3px 4px;
+  border-radius: 5px;
+  min-width: 0;
+  text-align: center;
+}
+
+.teamRight {
+  align-items: center;
+  text-align: center;
+}
+
+.winner { background: rgba(26, 122, 58, 0.14); }
+.loser  { opacity: 0.4; }
+.draw   { background: rgba(255, 255, 255, 0.03); }
+
+.flag { font-size: 1.4rem; flex-shrink: 0; line-height: 1; }
+
+.teamName {
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.2;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ── Score center ── */
+.scores {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 68px;
 }
 
 .scoreRow {
@@ -134,8 +180,8 @@
 }
 
 .scoreInput {
-  width: 30px;
-  height: 26px;
+  width: 28px;
+  height: 24px;
   background: var(--bg-deep);
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -165,14 +211,14 @@
 
 .resNum {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: var(--text-muted);
   width: 18px;
   text-align: center;
 }
 
-.winNum { color: var(--text-primary); }
+.winNum { color: var(--gold-light); }
 
 .resSep {
   font-family: var(--font-display);
@@ -182,7 +228,7 @@
 
 .vs {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-dim);
@@ -190,10 +236,10 @@
 
 .predictBtn {
   font-family: var(--font-display);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
   border: 1px dashed var(--pitch-mid);
   background: transparent;
@@ -204,11 +250,14 @@
 }
 .predictBtn:hover { border-color: var(--pitch); color: var(--gold-light); background: rgba(26,122,58,0.08); }
 
+/* Prediction badge — multi-line for knockout */
 .predBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 2px 7px;
+  padding: 3px 7px;
   border-radius: 4px;
   border: 1px solid var(--gold-dim);
   background: rgba(201,168,76,0.08);
@@ -220,14 +269,75 @@
 .predLocked { cursor: default; opacity: 0.6; }
 .predLocked:hover { background: rgba(201,168,76,0.08); }
 
+.predScore {
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.predMeta {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+
 .lockedChip {
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  padding: 2px 8px;
+  font-size: 0.78rem;
+  padding: 2px 6px;
   border-radius: 5px;
   border: 1px solid var(--border);
   background: var(--bg-deep);
   color: var(--text-muted);
+}
+
+/* ── Admin: advancing team picker (draws) ── */
+.adminResultWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.advancingPicker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.advancingLabel {
+  font-size: 0.56rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.advancingBtns { display: flex; gap: 4px; }
+
+.advancingBtn {
+  font-size: 1rem;
+  width: 28px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.advancingBtn:hover { border-color: var(--gold-dim); }
+.advancingActive {
+  border-color: var(--gold-dim);
+  background: rgba(201,168,76,0.15);
+}
+
+/* Advancing result chip (settled draws) */
+.advancingResult {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 /* ── Admin team inputs ── */

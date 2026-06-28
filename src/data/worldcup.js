@@ -339,18 +339,30 @@ export const PLAYER_COLORS = [
 ];
 
 /**
- * SCORING RULES:
+ * SCORING RULES — GROUP STAGE:
  * - Correct winner (or draw): 1 pt
  * - Correct home score: 1 pt
  * - Correct away score: 1 pt
  * - Correct winner + EXACT score (both): multiply total by 2
  * Max per match: (1+1+1) × 2 = 6 pts
+ *
+ * SCORING RULES — KNOCKOUT STAGE (isKnockout: true):
+ * All scores based on 90-minute result only.
+ * - Correct winner at 90 min: 2 pts
+ * - Correct home score: 2 pts
+ * - Correct away score: 2 pts
+ * - Correct winner + EXACT score: multiply total by 2 → max 12 pts
+ * - Correct over/under 2.5 goals (90 min total): +2 pts
+ * - Correct advancing team (incl. ET & pens): +2 pts
+ * Max per match: 12 + 2 + 2 = 16 pts
  */
-export function scoreForMatch(pred, actual) {
+export function scoreForMatch(pred, actual, { isKnockout = false } = {}) {
   if (!pred || !actual) return 0;
   const ph = Number(pred.homeScore), pa = Number(pred.awayScore);
   const ah = Number(actual.homeScore), aa = Number(actual.awayScore);
   if (isNaN(ph) || isNaN(pa) || isNaN(ah) || isNaN(aa)) return 0;
+
+  const base = isKnockout ? 2 : 1;
 
   const predWinner = ph > pa ? 'home' : pa > ph ? 'away' : 'draw';
   const actualWinner = ah > aa ? 'home' : aa > ah ? 'away' : 'draw';
@@ -361,12 +373,30 @@ export function scoreForMatch(pred, actual) {
   const exactScore = correctHome && correctAway;
 
   let pts = 0;
-  if (correctWinner) pts += 1;
-  if (correctHome) pts += 1;
-  if (correctAway) pts += 1;
+  if (correctWinner) pts += base;
+  if (correctHome) pts += base;
+  if (correctAway) pts += base;
   if (correctWinner && exactScore) pts *= 2;
+
+  if (isKnockout) {
+    // Over/Under 2.5 goals — 90-min total only
+    if (pred.overUnder) {
+      const actualOU = (ah + aa) > 2.5 ? 'over' : 'under';
+      if (pred.overUnder === actualOU) pts += 2;
+    }
+    // Who advances — covers extra time & penalties
+    if (pred.advancingTeam) {
+      const actualAdvancing = ah !== aa
+        ? (ah > aa ? 'home' : 'away')
+        : (actual.advancingTeam ?? null);
+      if (actualAdvancing && pred.advancingTeam === actualAdvancing) pts += 2;
+    }
+  }
+
   return pts;
 }
+
+const _knockoutIds = new Set(ALL_KNOCKOUT_MATCHES.map(m => m.id));
 
 export function computeLeaderboard(players, predictions, results) {
   return players.map(player => {
@@ -375,10 +405,12 @@ export function computeLeaderboard(players, predictions, results) {
     Object.keys(results).forEach(matchId => {
       const pred = predictions?.[player.id]?.[matchId];
       const actual = results[matchId];
-      const pts = scoreForMatch(pred, actual);
+      const isKnockout = _knockoutIds.has(matchId);
+      const pts = scoreForMatch(pred, actual, { isKnockout });
       breakdown[matchId] = pts;
       total += pts;
     });
-    return { ...player, total, breakdown };
+    const bonus = player.bonusPoints ?? 0;
+    return { ...player, total: total + bonus, breakdown };
   }).sort((a, b) => b.total - a.total);
 }
