@@ -21,8 +21,7 @@ export default function KnockoutMatchCard({
   roundId,
   onSetTeams, onSetResult, onSetPrediction,
   isAdmin, activePlayer,
-  pairPosition, // 'top' | 'bottom' | 'single'
-  isLast,       // true for Final/3rd (no right connector)
+  mobile,
 }) {
   const home = teams?.home ?? null;
   const away = teams?.away ?? null;
@@ -104,14 +103,9 @@ export default function KnockoutMatchCard({
 
   const isFinalMatch = match.id === 'FINAL';
 
-  const wrapperClass = [
-    styles.wrapper,
-    pairPosition === 'top' && !isLast ? styles.pairTop : '',
-    pairPosition === 'bottom' && !isLast ? styles.pairBottom : '',
-  ].filter(Boolean).join(' ');
-
   const cardClass = [
     styles.card,
+    mobile ? styles.mobile : '',
     hasResult ? styles.settled : hasPred ? styles.hasPred : '',
     roundId ? styles[`round_${roundId}`] : '',
     isFinalMatch ? styles.isFinal : '',
@@ -124,8 +118,7 @@ export default function KnockoutMatchCard({
 
   return (
     <>
-      <div className={wrapperClass}>
-        <div ref={cardRef} className={cardClass}>
+      <div ref={cardRef} className={cardClass}>
           <div className={styles.meta}>
             {isFinalMatch && <span className={styles.matchBadge}>⚽ Final</span>}
             <span className={styles.date}>{formatKickoff(match.kickoff).date} · {formatKickoff(match.kickoff).time}</span>
@@ -224,7 +217,6 @@ export default function KnockoutMatchCard({
               </div>
             </div>
           )}
-        </div>
       </div>
 
       {modalOpen && (

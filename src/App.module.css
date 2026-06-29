@@ -212,6 +212,14 @@
 /* ── Responsive ── */
 @media (max-width: 780px) {
   .main { padding: 16px 14px; }
+  .nav {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .navBtn { white-space: nowrap; flex-shrink: 0; }
 }
 
 @media (max-width: 600px) {

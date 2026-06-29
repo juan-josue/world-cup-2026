@@ -10,13 +10,15 @@ import NextMatchBanner from './components/NextMatchBanner';
 import MissingPredictionsBanner from './components/MissingPredictionsBanner';
 import GracePeriodBanner from './components/GracePeriodBanner';
 import KnockoutView from './components/KnockoutView';
+import Movers from './components/Movers';
+import RaceChart from './components/RaceChart';
 import MusicPlayer from './components/MusicPlayer';
 import BackToTop from './components/BackToTop';
 import Splash from './components/Splash';
 import './index.css';
 import styles from './App.module.css';
 
-const TABS = ['MATCHES', 'KNOCKOUT', 'LEADERBOARD'];
+const TABS = ['MATCHES', 'KNOCKOUT', 'MOVERS', 'RACE', 'LEADERBOARD'];
 
 const appVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -204,6 +206,21 @@ export default function App() {
                     onSetResult={setResult}
                     onSetTeams={setKnockoutTeam}
                     isAdmin={isAdmin}
+                  />
+                )}
+                {tab === 'MOVERS' && (
+                  <Movers
+                    players={players}
+                    predictions={predictions}
+                    results={results}
+                    knockoutTeams={knockoutTeams}
+                  />
+                )}
+                {tab === 'RACE' && (
+                  <RaceChart
+                    players={players}
+                    predictions={predictions}
+                    results={results}
                   />
                 )}
                 {tab === 'LEADERBOARD' && (

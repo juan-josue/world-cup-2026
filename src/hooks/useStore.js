@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { doc, onSnapshot, setDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '../firebase';
+import { propagateKnockoutResult } from '../data/worldcup';
 
 const DOC = doc(db, 'wc26', 'data');
 
@@ -74,8 +75,13 @@ export function useStore() {
   const setResult = useCallback((matchId, homeScore, awayScore, advancingTeam) => {
     const resultObj = { homeScore, awayScore };
     if (advancingTeam) resultObj.advancingTeam = advancingTeam;
-    patch({ results: { ...results, [matchId]: resultObj } });
-  }, [results]);
+    const update = { results: { ...results, [matchId]: resultObj } };
+
+    const teamPatch = propagateKnockoutResult(matchId, resultObj, knockoutTeams);
+    if (teamPatch) update.knockoutTeams = { ...knockoutTeams, ...teamPatch };
+
+    patch(update);
+  }, [results, knockoutTeams]);
 
   const clearResult = useCallback((matchId) => {
     const r = { ...results };

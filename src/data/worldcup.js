@@ -184,8 +184,8 @@ export const KNOCKOUT_ROUNDS = [
   {
     id: 'sf', name: 'Semi-Finals',
     matches: [
-      { id:'SF1', date:'Jul 14', kickoff:'2026-07-14T15:00:00-04:00', homeDesc:'W QF1', awayDesc:'W QF2', nextMatchId:'FINAL', nextSlot:'home' },
-      { id:'SF2', date:'Jul 15', kickoff:'2026-07-15T15:00:00-04:00', homeDesc:'W QF3', awayDesc:'W QF4', nextMatchId:'FINAL', nextSlot:'away' },
+      { id:'SF1', date:'Jul 14', kickoff:'2026-07-14T15:00:00-04:00', homeDesc:'W QF1', awayDesc:'W QF2', nextMatchId:'FINAL', nextSlot:'home', loserMatchId:'3RD', loserSlot:'home' },
+      { id:'SF2', date:'Jul 15', kickoff:'2026-07-15T15:00:00-04:00', homeDesc:'W QF3', awayDesc:'W QF4', nextMatchId:'FINAL', nextSlot:'away', loserMatchId:'3RD', loserSlot:'away' },
     ],
   },
   {
@@ -203,6 +203,39 @@ export const ALL_KNOCKOUT_MATCHES = KNOCKOUT_ROUNDS.flatMap(r => r.matches.map(m
 export const MATCH_BY_ID = Object.fromEntries(
   [...ALL_MATCHES, ...ALL_KNOCKOUT_MATCHES].map(m => [m.id, m])
 );
+
+export function propagateKnockoutResult(matchId, result, knockoutTeams) {
+  const match = MATCH_BY_ID[matchId];
+  const teams = knockoutTeams?.[matchId];
+  if (!match || !teams || !result) return null;
+
+  const h = Number(result.homeScore), a = Number(result.awayScore);
+  if (isNaN(h) || isNaN(a)) return null;
+
+  // Decide winning side. Non-draws are automatic; draws need an advancingTeam.
+  const winSide = h > a ? 'home' : a > h ? 'away' : result.advancingTeam;
+  if (winSide !== 'home' && winSide !== 'away') return null;
+  const loseSide = winSide === 'home' ? 'away' : 'home';
+
+  const winTeam = teams[winSide];
+  const loseTeam = teams[loseSide];
+  if (!winTeam) return null;
+
+  const patch = {};
+  if (match.nextMatchId && match.nextSlot) {
+    patch[match.nextMatchId] = {
+      ...(knockoutTeams[match.nextMatchId] || {}),
+      [match.nextSlot]: winTeam,
+    };
+  }
+  if (match.loserMatchId && match.loserSlot && loseTeam) {
+    patch[match.loserMatchId] = {
+      ...(knockoutTeams[match.loserMatchId] || {}),
+      [match.loserSlot]: loseTeam,
+    };
+  }
+  return Object.keys(patch).length ? patch : null;
+}
 
 // Format a kickoff (ISO string, ms, or Date) in the VIEWER's local timezone.
 export function formatKickoff(value) {
@@ -413,4 +446,97 @@ export function computeLeaderboard(players, predictions, results) {
     const bonus = player.bonusPoints ?? 0;
     return { ...player, total: total + bonus, breakdown };
   }).sort((a, b) => b.total - a.total);
+}
+
+function _leaderId(cumulative, players) {
+  const sorted = [...players].sort(
+    (a, b) => (cumulative[b.id] ?? 0) - (cumulative[a.id] ?? 0) || a.name.localeCompare(b.name)
+  );
+  const top = sorted[0];
+  return top && (cumulative[top.id] ?? 0) > 0 ? top.id : null;
+}
+
+
+export function computeMovers(players, predictions, results) {
+  if (!players.length) return [];
+
+  const cumulative = {};
+  players.forEach(p => {
+    let base = p.bonusPoints ?? 0;
+    Object.keys(results).forEach(id => {
+      if (_knockoutIds.has(id)) return; // group stage only
+      base += scoreForMatch(predictions?.[p.id]?.[id], results[id], { isKnockout: false });
+    });
+    cumulative[p.id] = base;
+  });
+
+  const settled = Object.keys(results)
+    .filter(id => _knockoutIds.has(id) && MATCH_BY_ID[id])
+    .sort((a, b) => (Date.parse(MATCH_BY_ID[a].kickoff) || 0) - (Date.parse(MATCH_BY_ID[b].kickoff) || 0));
+
+  let prevLeaderId = _leaderId(cumulative, players);
+  const feed = [];
+
+  for (const matchId of settled) {
+    const match = MATCH_BY_ID[matchId];
+    const result = results[matchId];
+
+    const swings = players.map(p => {
+      const pred = predictions?.[p.id]?.[matchId];
+      const pts = scoreForMatch(pred, result, { isKnockout: true });
+      const exact = pred &&
+        Number(pred.homeScore) === Number(result.homeScore) &&
+        Number(pred.awayScore) === Number(result.awayScore);
+      return { id: p.id, name: p.name, color: p.color, pts, hasPred: pred !== undefined, exact: !!(pts && exact) };
+    });
+    swings.forEach(s => { cumulative[s.id] += s.pts; });
+
+    const maxPts = Math.max(0, ...swings.map(s => s.pts));
+    swings.forEach(s => { s.isTopMover = s.pts > 0 && s.pts === maxPts; });
+    swings.sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+
+    const leaderId = _leaderId(cumulative, players);
+    const leaderChanged = !!leaderId && leaderId !== prevLeaderId;
+    const prevLeaderName = leaderChanged ? (players.find(p => p.id === prevLeaderId)?.name ?? null) : null;
+    if (leaderId) prevLeaderId = leaderId;
+
+    feed.push({
+      matchId,
+      match,
+      result,
+      swings,
+      maxPts,
+      leaderName: leaderId ? players.find(p => p.id === leaderId)?.name ?? null : null,
+      leaderTotal: leaderId ? cumulative[leaderId] : 0,
+      leaderChanged,
+      prevLeaderName,
+    });
+  }
+
+  return feed.reverse();
+}
+
+export function computeStandingsHistory(players, predictions, results) {
+  if (!players.length) return { steps: [], maxTotal: 1 };
+
+  const settled = Object.keys(results)
+    .filter(id => MATCH_BY_ID[id])
+    .sort((a, b) => (Date.parse(MATCH_BY_ID[a].kickoff) || 0) - (Date.parse(MATCH_BY_ID[b].kickoff) || 0));
+
+  const cum = {};
+  players.forEach(p => { cum[p.id] = p.bonusPoints ?? 0; });
+  const snap = () => Object.fromEntries(players.map(p => [p.id, cum[p.id]]));
+
+  const steps = [{ matchId: null, match: null, kickoff: null, knockout: false, totals: snap() }];
+  for (const id of settled) {
+    const match = MATCH_BY_ID[id];
+    const isKnockout = _knockoutIds.has(id);
+    players.forEach(p => {
+      cum[p.id] += scoreForMatch(predictions?.[p.id]?.[id], results[id], { isKnockout });
+    });
+    steps.push({ matchId: id, match, kickoff: match.kickoff, knockout: isKnockout, totals: snap() });
+  }
+
+  const maxTotal = Math.max(1, ...players.map(p => cum[p.id]));
+  return { steps, maxTotal };
 }
