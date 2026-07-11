@@ -21,7 +21,7 @@ const roundIdForMatch = (matchId) =>
 
 export default function KnockoutView({
   predictions, results, knockoutTeams, activePlayer, now, focusMatchId, focusKey,
-  onSetPrediction, onSetResult, onSetTeams, isAdmin,
+  onSetPrediction, onSetResult, onClearResult, onSetTeams, isAdmin,
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -56,6 +56,7 @@ export default function KnockoutView({
         roundId={roundId}
         onSetTeams={(h, a) => onSetTeams(match.id, h, a)}
         onSetResult={(h, a, adv) => onSetResult(match.id, h, a, adv)}
+        onClearResult={() => onClearResult(match.id)}
         onSetPrediction={(predObj) => onSetPrediction(match.id, predObj)}
         isAdmin={isAdmin}
         activePlayer={activePlayer}

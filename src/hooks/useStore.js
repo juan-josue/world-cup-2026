@@ -22,6 +22,7 @@ export function useStore() {
   const [predictions, setPredictions] = useState({});
   const [results, setResults] = useState({});
   const [knockoutTeams, setKnockoutTeams] = useState({});
+  const [adminUnlocks, setAdminUnlocks] = useState([]);
   const [activePlayer, setActivePlayerState] = useState(() => loadLocal('wc26_activePlayer', null));
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +34,7 @@ export function useStore() {
         setPredictions(d.predictions ?? {});
         setResults(d.results ?? {});
         setKnockoutTeams(d.knockoutTeams ?? {});
+        setAdminUnlocks(d.adminUnlocks ?? []);
       }
       setLoading(false);
     });
@@ -84,10 +86,8 @@ export function useStore() {
   }, [results, knockoutTeams]);
 
   const clearResult = useCallback((matchId) => {
-    const r = { ...results };
-    delete r[matchId];
-    patch({ results: r });
-  }, [results]);
+    updateDoc(DOC, { [`results.${matchId}`]: deleteField() });
+  }, []);
 
   const switchPlayer = useCallback((id) => {
     setActivePlayerState(id);
@@ -128,8 +128,100 @@ export function useStore() {
     });
   }, [knockoutTeams]);
 
+  const seedR16Teams = useCallback(() => {
+    patch({
+      knockoutTeams: {
+        ...knockoutTeams,
+        R16_1: { home: 'Canada',         away: 'Morocco' },
+        R16_2: { home: 'Paraguay',       away: 'France' },
+        R16_3: { home: 'Brazil',         away: 'Norway' },
+        R16_4: { home: 'Mexico',         away: 'England' },
+        R16_5: { home: 'Portugal',       away: 'Spain' },
+        R16_6: { home: 'United States',  away: 'Belgium' },
+        R16_7: { home: 'Argentina',      away: 'Egypt' },
+        R16_8: { home: 'Switzerland',    away: 'Colombia' },
+      },
+    });
+  }, [knockoutTeams]);
+
+  const seedQFTeams = useCallback(() => {
+    patch({
+      knockoutTeams: {
+        ...knockoutTeams,
+        QF1: { home: 'France',       away: 'Morocco'      }, // Jul 9  — France won 2-0
+        QF2: { home: 'Spain',        away: 'Belgium'      }, // Jul 10 — Spain won 2-1
+        QF3: { home: 'Norway',       away: 'England'      }, // Jul 11 — today 5pm ET
+        QF4: { home: 'Argentina',    away: 'Switzerland'  }, // Jul 11 — today 9pm ET
+      },
+    });
+  }, [knockoutTeams]);
+
+  // Atomic fix for QF2/QF3 data swap.
+  //
+  // History: knockoutTeams.QF2 had Norway/England and QF3 had Spain/Belgium (wrong).
+  // After seedQFTeams corrected the team display, data remained in wrong slots:
+  //   - predictions.*.QF2  = Norway/England predictions (made when QF2 showed NOR/ENG)
+  //   - predictions.*.QF3  = Spain/Belgium predictions  (made when QF3 showed ESP/BEL)
+  //   - results.QF3        = {2,1} Spain/Belgium result (should be QF2)
+  //
+  // A prior partial fix (v1) used setDoc+merge which cannot delete Firestore fields:
+  //   - Added predictions.*.QF2 = QF3 value for those who had QF3 → left QF3 as duplicate
+  //   - Added results.QF2 = results.QF3                            → left QF3 still present
+  //   - Did NOT touch predictions.*.QF2 (Norway/England preds)     → they stay in QF2
+  //
+  // Correct state after this fix:
+  //   - predictions.*.QF2 = Spain/Belgium predictions
+  //   - predictions.*.QF3 = Norway/England predictions (or absent if no prediction)
+  //   - results.QF2       = {2,1}  (Spain 2-1 Belgium)
+  //   - results.QF3       = absent (Norway/England hasn't played)
+  const fixQF2QF3Swap = useCallback(async () => {
+    const update = {};
+
+    // 1. Delete results.QF3 (game not played; Spain/Belgium result already in QF2)
+    if (results.QF3 !== undefined) {
+      if (results.QF2 === undefined) {
+        // v1 never added QF2 — copy it before deleting
+        update['results.QF2'] = results.QF3;
+      }
+      update['results.QF3'] = deleteField();
+    }
+
+    // 2. Fix predictions per player
+    for (const [playerId, preds] of Object.entries(predictions)) {
+      if (!preds) continue;
+      const hasQF2 = preds.QF2 !== undefined;
+      const hasQF3 = preds.QF3 !== undefined;
+
+      if (hasQF2 && hasQF3) {
+        // v1 copied QF3 into QF2 but left QF3 as stale duplicate.
+        // QF2 = Spain/Belgium pred (correct). Delete the QF3 dupe.
+        update[`predictions.${playerId}.QF3`] = deleteField();
+      } else if (hasQF2) {
+        // Only QF2 = original Norway/England prediction. Move it to QF3.
+        update[`predictions.${playerId}.QF3`] = preds.QF2;
+        update[`predictions.${playerId}.QF2`] = deleteField();
+      } else if (hasQF3) {
+        // Only QF3 = Spain/Belgium pred that v1 failed to copy. Move to QF2.
+        update[`predictions.${playerId}.QF2`] = preds.QF3;
+        update[`predictions.${playerId}.QF3`] = deleteField();
+      }
+    }
+
+    // 3. Fix SF bracket: Spain (QF2 winner) → SF1 away; clear from SF2 home
+    if (knockoutTeams.SF1?.away !== 'Spain') {
+      update['knockoutTeams.SF1.away'] = 'Spain';
+    }
+    if (knockoutTeams.SF2?.home === 'Spain') {
+      update['knockoutTeams.SF2.home'] = deleteField();
+    }
+
+    if (Object.keys(update).length > 0) {
+      await updateDoc(DOC, update);
+    }
+  }, [predictions, results, knockoutTeams]);
+
   return {
     players, predictions, results, knockoutTeams, activePlayer, loading,
-    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, setBonusPoints, resetAll, seedR32Teams,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, switchPlayer, setKnockoutTeam, setBonusPoints, resetAll, seedR32Teams, seedR16Teams, seedQFTeams, fixQF2QF3Swap,
   };
 }

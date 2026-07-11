@@ -28,7 +28,7 @@ const appVariants = {
 export default function App() {
   const {
     players, predictions, results, activePlayer,
-    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, knockoutTeams, setKnockoutTeam, switchPlayer, setBonusPoints, resetAll, seedR32Teams, loading,
+    addPlayer, removePlayer, setPrediction, clearPrediction, setResult, clearResult, knockoutTeams, setKnockoutTeam, switchPlayer, setBonusPoints, resetAll, seedR32Teams, seedR16Teams, seedQFTeams, fixQF2QF3Swap, loading,
   } = useStore();
 
   const [tab, setTab] = useState('KNOCKOUT');
@@ -152,6 +152,31 @@ export default function App() {
                     }}
                   >Seed R32 Teams</button>
                   <button
+                    className={styles.seedBtn}
+                    onClick={() => {
+                      if (window.confirm('Seed all 8 Round of 16 teams from actual results? This will overwrite any existing R16 team assignments.')) {
+                        seedR16Teams();
+                      }
+                    }}
+                  >Seed R16 Teams</button>
+                  <button
+                    className={styles.seedBtn}
+                    onClick={() => {
+                      if (window.confirm('Fix QF team assignments? This sets QF1=France/Morocco, QF2=Spain/Belgium, QF3=Norway/England, QF4=Argentina/Switzerland. Predictions and results are NOT affected.')) {
+                        seedQFTeams();
+                      }
+                    }}
+                  >Fix QF Teams</button>
+                  <button
+                    className={styles.seedBtn}
+                    style={{ borderColor: '#d94f3d', color: '#d94f3d' }}
+                    onClick={() => {
+                      if (window.confirm('Fix QF2/QF3 data swap?\n\nThis moves all predictions and results from QF3 → QF2 (Spain/Belgium), fixes the SF1 bracket, and removes Spain from SF2.\n\nAll scores and predictions are preserved — only which slot they belong to is corrected.\n\nRun this ONCE to repair the corrupted state.')) {
+                        fixQF2QF3Swap();
+                      }
+                    }}
+                  >Fix QF2/QF3 Swap</button>
+                  <button
                     className={styles.resetBtn}
                     onClick={() => {
                       if (window.confirm('Reset everything? This will delete all players, predictions, and results.')) {
@@ -204,6 +229,7 @@ export default function App() {
                       setPrediction(activePlayer, matchId, predObj);
                     }}
                     onSetResult={setResult}
+                    onClearResult={clearResult}
                     onSetTeams={setKnockoutTeam}
                     isAdmin={isAdmin}
                   />

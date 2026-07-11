@@ -19,7 +19,7 @@ export default function KnockoutMatchCard({
   match, teams, result, prediction, now,
   focusMatchId, focusKey,
   roundId,
-  onSetTeams, onSetResult, onSetPrediction,
+  onSetTeams, onSetResult, onClearResult, onSetPrediction,
   isAdmin, activePlayer,
   mobile,
 }) {
@@ -151,6 +151,13 @@ export default function KnockoutMatchCard({
                       <ScoreInput value={localResHome} onChange={v => handleResChange('home', v)} />
                       <span className={styles.sep}>–</span>
                       <ScoreInput value={localResAway} onChange={v => handleResChange('away', v)} />
+                      {hasResult && onClearResult && (
+                        <button
+                          className={styles.clearResBtn}
+                          onClick={() => { if (window.confirm('Clear this result? Predictions are kept.')) onClearResult(); }}
+                          title="Clear result"
+                        >✕</button>
+                      )}
                     </div>
                     {/* Advancing team picker — only shown for draws */}
                     {isDraw90 && (

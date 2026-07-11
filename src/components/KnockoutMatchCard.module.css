@@ -347,6 +347,19 @@
 .setBtn:hover:not(:disabled) { background: var(--pitch-mid); }
 .setBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+.clearResBtn {
+  background: transparent;
+  border: 1px solid rgba(217, 79, 61, 0.5);
+  color: #d94f3d;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  cursor: pointer;
+  line-height: 1;
+  margin-left: 4px;
+}
+.clearResBtn:hover { background: rgba(217, 79, 61, 0.15); }
+
 /* ══════════════════════════ MOBILE ══════════════════════════ */
 .mobile {
   width: 100%;
